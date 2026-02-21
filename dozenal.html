@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dozenal Time Colors</title>
+  <style>
+    :root { --bg: #000; }
+    html, body { height: 100%; margin: 0; }
+    body { background: var(--bg); display: grid; place-items: center; }
+
+    .square {
+      width: min(92vmin, 520px);
+      aspect-ratio: 1 / 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 0;
+      border-radius: 24px;
+      overflow: hidden;
+    }
+    .cell { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <div class="square" id="square" aria-label="Dozenal time as colors">
+    <div class="cell" id="d0"></div>
+    <div class="cell" id="d1"></div>
+    <div class="cell" id="d2"></div>
+    <div class="cell" id="d3"></div>
+  </div>
+
+  <script>
+    // Digit -> color palette for dozenal digits 0..b (12 digits).
+    // Mapping 0-b = 6425CB 3A34D6 004DFF 0088CC 00AAAA 008026
+    //              8DB813 FFED00 FFBB00 FF8C00 F55A00 E40303
+    const palette = [
+      "#E40303", // 0
+      "#F55A00", // 1
+      "#FF8C00", // 2
+      "#FFBB00", // 3
+      "#FFED00", // 4
+      "#8DB813", // 5
+      "#008026", // 6
+      "#00AAAA", // 7
+      "#0088CC", // 8
+      "#004DFF", // 9
+      "#3A34D6", // a (10)
+      "#6425CB"  // b (11)
+    ];
+
+    const cells = [
+      document.getElementById("d0"),
+      document.getElementById("d1"),
+      document.getElementById("d2"),
+      document.getElementById("d3")
+    ];
+
+    const square = document.getElementById("square");
+
+    function floorDozenalDayNumber(date = new Date()) {
+      const HH = date.getHours();       // 0..23
+      const MM = date.getMinutes();     // 0..59
+      const SS = date.getSeconds();     // 0..59
+      const ms = date.getMilliseconds();// 0..999
+
+      // fraction of day:
+      // (HH/24 + MM/24/60 + SS/24/60^2) = (totalSeconds / 86400)
+      const totalSeconds = HH * 3600 + MM * 60 + SS + ms / 1000;
+      const fraction = totalSeconds / 86400;
+
+      // N = floor(fraction * 12^4), range 0..20735 (since fraction < 1)
+      const N = Math.floor(fraction * 20736);
+      return N;
+    }
+
+    function toBase12Padded(n, width = 4) {
+      const digits = "0123456789ab";
+      let s = "";
+      for (let i = 0; i < width; i++) {
+        const rem = n % 12;
+        s = digits[rem] + s;
+        n = Math.floor(n / 12);
+      }
+      return s;
+    }
+
+    function render() {
+      const N = floorDozenalDayNumber();
+      const s = toBase12Padded(N, 4); // 4 dozenal digits, leading zeros
+
+      // Map each dozenal digit to 0..11
+      const digitVals = s.split("").map(ch => {
+        if (ch >= "0" && ch <= "9") return ch.charCodeAt(0) - 48;
+        if (ch === "a") return 10;
+        if (ch === "b") return 11;
+        return 0;
+      });
+
+      digitVals.forEach((v, i) => {
+        cells[i].style.background = palette[v];
+      });
+
+      document.title = `Dozenal Time Colors (${s})`;
+      square.setAttribute("aria-label", `Dozenal time ${s}`);
+    }
+
+    function scheduleAlignedUpdates() {
+      // Align to the next whole second, then tick every second.
+      const now = new Date();
+      const msUntilNextSecond = 1000 - now.getMilliseconds();
+
+      setTimeout(() => {
+        render();
+        setInterval(render, 1000);
+      }, msUntilNextSecond);
+    }
+
+    render();
+    scheduleAlignedUpdates();
+  </script>
+</body>
+</html>
