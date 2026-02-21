@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Time Colors (HHMM)</title>
+  <style>
+    :root {
+      --bg: #000;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      background: var(--bg);
+      display: grid;
+      place-items: center;
+    }
+    /* A max-width square that scales to viewport */
+    .square {
+      width: min(92vmin, 520px);
+      aspect-ratio: 1 / 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 0;
+      border-radius: 24px;
+      overflow: hidden;
+    }
+    .cell { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <div class="square" aria-label="Current time as colors">
+    <div class="cell" id="d0"></div>
+    <div class="cell" id="d1"></div>
+    <div class="cell" id="d2"></div>
+    <div class="cell" id="d3"></div>
+  </div>
+
+  <script>
+    // Digit -> hex palette (0..9)
+    const palette = [
+      "#E40303", // 0
+      "#F55A00", // 1
+      "#FF8C00", // 2
+      "#FFBB00", // 3
+      "#FFED00", // 4
+      "#8DB813", // 5
+      "#008026", // 6
+      "#00AAAA", // 7
+      "#004DFF", // 8
+      "#6425CB"  // 9
+    ];
+
+    const cells = [
+      document.getElementById("d0"),
+      document.getElementById("d1"),
+      document.getElementById("d2"),
+      document.getElementById("d3"),
+    ];
+
+    function hhmmDigits(date = new Date()) {
+      // 24-hour HHMM using local time
+      const HH = String(date.getHours()).padStart(2, "0");
+      const MM = String(date.getMinutes()).padStart(2, "0");
+      return (HH + MM).split("").map(ch => Number(ch));
+    }
+
+    function render() {
+      const digits = hhmmDigits();
+      digits.forEach((digit, i) => {
+        cells[i].style.background = palette[digit];
+      });
+
+      // Helpful if you inspect the tab / accessibility tree
+      document.title = `Time Colors (${digits.join("")})`;
+      document.querySelector(".square").setAttribute(
+        "aria-label",
+        `Current time digits ${digits.join(" ")} as colors`
+      );
+    }
+
+    function scheduleNextMinuteTick() {
+      const now = new Date();
+      const msUntilNextMinute =
+        (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+
+      setTimeout(() => {
+        render();
+        // After the first alignment, tick every minute.
+        setInterval(render, 60 * 1000);
+      }, msUntilNextMinute);
+    }
+
+    render();
+    scheduleNextMinuteTick();
+  </script>
+</body>
+</html>
