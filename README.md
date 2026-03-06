@@ -2,9 +2,9 @@
 
 2x2 color clock 0000–2359
 
-### Examples 08:59 17:36
+### Examples 08:59 17:36 19:50
 
-<img src="0859.png" alt="08:59 = red blue chartreuse violet" width="120"> <img src="1736.png" alt="17:36 = vermillion teal gold green" width="120">
+<img src="0859.png" alt="08:59 = red blue chartreuse violet" width="120"> <img src="1736.png" alt="17:36 = vermillion teal gold green" width="120"> <img src="1950.png" alt="19:50 = vermillion violet chartreuse red" width="120">
 
 ### The ten colors 0 through 9
 
