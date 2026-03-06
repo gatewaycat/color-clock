@@ -1,6 +1,6 @@
 # color-clock
 
-2x2 color clock 0000–2359
+2x2 ten color clock 0000–2359
 
 ### Examples 08:59 17:36 19:50
 
