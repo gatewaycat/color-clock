@@ -4,9 +4,9 @@ A minimal ten color clock
 
 2x2 square HH (00–23) over MM (00–59)
 
-#### For example 08:59
+#### Examples 08:59 18:45
 
-<img src="0859.png" alt="08:59 = red blue chartreuse violet" width="120">
+<img src="0859.png" alt="08:59 = red blue chartreuse violet" width="120"> <img src="1736.png" alt="17:36 = vermillion teal gold green" width="120">
 
 ## The ten colors 0 through 9
 
