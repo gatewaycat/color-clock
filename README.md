@@ -1,30 +1,13 @@
 # color-clock
 
-A minimal color clock.
+A minimal ten color clock
 
-Two static HTML files that render time as a 2x2 square of colors.
+2x2 square HH (00–23) over MM (00–59)
 
-## 24 hour clock
+## The ten colors 0 through 9
 
-*Live Preview: https://htmlpreview.github.io/?https://github.com/gatewaycat/color-clock/blob/main/hhmm.html*
+<img src="0.png" alt="Digit 0 = #E40303 = red" width="60"> <img src="1.png" alt="Digit 1 = #F55A00 = vermillion" width="60"> <img src="2.png" alt="Digit 2 = #FF8C00 = orange" width="60"> <img src="3.png" alt="Digit 3 = #FFBB00 = gold" width="60"> <img src="4.png" alt="Digit 4 = #FFED00 = yellow" width="60"> <img src="5.png" alt="Digit 5 = #8DB813 = chartreuse" width="60"> <img src="6.png" alt="Digit 6 = #008026 = green" width="60"> <img src="7.png" alt="Digit 7 = #00AAAA = teal" width="60"> <img src="8.png" alt="Digit 8 = #004DFF = blue" width="60"> <img src="9.png" alt="Digit 9 = #6425CB = red" width="60">
 
-A regular 24 hour clock (HHMM) with the following mapping:
+## Live preview
 
-0 `#E40303` 1 `#F55A00` 2 `#FF8C00` 3 `#FFBB00` 4 `#FFED00`
-5 `#8DB813` 6 `#008026` 7 `#00AAAA` 8 `#004DFF` 9 `#6425CB`
-
-## Equal interval dozenal clock
-
-*Live Preview: https://htmlpreview.github.io/?https://github.com/gatewaycat/color-clock/blob/main/dozenal.html*
-
-Fraction of day in base 12 from 0000 to bbbb with the following mapping:
-
-0 `#E40303` 1 `#F55A00` 2 `#FF8C00` 3 `#FFBB00` 4 `#FFED00` 5 `#8DB813`
-6 `#008026` 7 `#00AAAA` 8 `#0088CC` 9 `#004DFF` a `#3A34D6` b `#6425CB`
-
-## Notes
-
-- Pure HTML, CSS, and JavaScript.
-- No dependencies.
-- Designed to scale cleanly to any viewport.
-- Intended as a minimal aesthetic time visualization experiment.
+https://htmlpreview.github.io/?https://github.com/gatewaycat/color-clock/blob/main/hhmm.html
