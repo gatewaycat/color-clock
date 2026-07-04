@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Today's Date, Many Ways</title>
+  <style>
+    :root {
+      --bg: #000;
+      --panel: #0b0b0b;
+      --muted: #8a8a8a;
+      --hair: #1c1c1c;
+    }
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: var(--bg);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+    .card {
+      width: min(92vmin, 560px);
+      background: var(--panel);
+      border-radius: 24px;
+      padding: clamp(20px, 5vw, 36px);
+      box-sizing: border-box;
+    }
+    header { margin-bottom: 22px; }
+    .weekday {
+      font-size: clamp(24px, 7vw, 40px);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.05;
+    }
+    .fulldate { color: var(--muted); margin-top: 4px; font-size: clamp(14px, 3.5vw, 17px); }
+
+    ul { list-style: none; margin: 0; padding: 0; }
+    li {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      padding: 14px 0;
+      border-top: 1px solid var(--hair);
+    }
+    li:first-child { border-top: none; }
+    .swatch {
+      flex: 0 0 auto;
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      transform: translateY(-1px);
+    }
+    .body { flex: 1 1 auto; min-width: 0; }
+    .value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: clamp(20px, 5.5vw, 30px);
+      font-weight: 600;
+      line-height: 1.15;
+      word-break: break-word;
+    }
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 5px;
+    }
+    .gloss { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    footer { color: var(--hair); font-size: 11px; margin-top: 18px; text-align: right; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <header>
+      <div class="weekday" id="weekday">&nbsp;</div>
+      <div class="fulldate" id="fulldate">&nbsp;</div>
+    </header>
+    <ul id="rows"></ul>
+    <footer>live · updates every second</footer>
+  </div>
+
+  <script>
+    // The ten color-clock digit colors, reused as accents.
+    const palette = [
+      "#E40303", "#F55A00", "#FF8C00", "#FFBB00", "#FFED00",
+      "#8DB813", "#008026", "#00AAAA", "#004DFF", "#6425CB"
+    ];
+
+    const weekdayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    const isoWeekdayNames = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+    const monthNames = ["January","February","March","April","May","June",
+      "July","August","September","October","November","December"];
+
+    // --- Date/time representations -------------------------------------
+
+    // Day of the year, 1..366, from the local calendar date.
+    function ordinalDay(d) {
+      const a = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+      const b = Date.UTC(d.getFullYear(), 0, 1);
+      return Math.round((a - b) / 86400000) + 1;
+    }
+
+    // ISO 8601 week date: { isoYear, week, weekday(1=Mon..7=Sun) }.
+    function isoWeekDate(d) {
+      const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      const dayNr = (t.getUTCDay() + 6) % 7;           // Mon=0 .. Sun=6
+      t.setUTCDate(t.getUTCDate() - dayNr + 3);        // move to this week's Thursday
+      const isoYear = t.getUTCFullYear();
+      const jan4 = new Date(Date.UTC(isoYear, 0, 4));
+      const week = 1 + Math.round(
+        ((t - jan4) / 86400000 - 3 + ((jan4.getUTCDay() + 6) % 7)) / 7
+      );
+      return { isoYear, week, weekday: dayNr + 1 };
+    }
+
+    // Julian Day Number for a proleptic-Gregorian calendar date (m is 1..12).
+    function julianDayNumber(y, m, day) {
+      const a = Math.floor((14 - m) / 12);
+      const yy = y + 4800 - a;
+      const mm = m + 12 * a - 3;
+      return day + Math.floor((153 * mm + 2) / 5) + 365 * yy
+        + Math.floor(yy / 4) - Math.floor(yy / 100) + Math.floor(yy / 400) - 32045;
+    }
+
+    // Custom "fortnight" calendar: the year is cut into fortnights labelled
+    // a, b, c … the last one (z) absorbs the stray days at year's end.
+    function fortnight(ordinal) {
+      let idx = Math.floor((ordinal - 1) / 14);
+      if (idx > 25) idx = 25;
+      const day = ordinal - idx * 14;
+      const letter = String.fromCharCode(97 + idx);
+      return { letter, day, ordinal: idx + 1 };
+    }
+
+    // Swatch Internet Time (.beats): 1000 beats per day, measured in
+    // Biel Mean Time = UTC+1, no time zones.
+    function beats(d) {
+      const utcSec = d.getUTCHours() * 3600 + d.getUTCMinutes() * 60
+        + d.getUTCSeconds() + d.getUTCMilliseconds() / 1000;
+      const bmt = (utcSec + 3600) % 86400;             // shift into UTC+1
+      return Math.floor(bmt / 86.4);
+    }
+
+    // --- Rendering -----------------------------------------------------
+
+    const rowsEl = document.getElementById("rows");
+    const weekdayEl = document.getElementById("weekday");
+    const fulldateEl = document.getElementById("fulldate");
+
+    function build(d) {
+      const y = d.getFullYear();
+      const mo = d.getMonth();               // 0-based
+      const da = d.getDate();
+      const p2 = n => String(n).padStart(2, "0");
+
+      const ord = ordinalDay(d);
+      const iso = isoWeekDate(d);
+      const jdn = julianDayNumber(y, mo + 1, da);
+      const fn = fortnight(ord);
+      const beat = beats(d);
+      const megaseconds = d.getTime() / 1e9;   // Unix ms / 1e9 = seconds / 1e6 = Ms
+
+      return [
+        {
+          value: `${y}-${p2(mo + 1)}-${p2(da)}`,
+          label: "ISO 8601 calendar date",
+          gloss: `${monthNames[mo]} ${da}, ${y}`
+        },
+        {
+          value: `${iso.isoYear}-W${p2(iso.week)}-${iso.weekday}`,
+          label: "ISO 8601 week date",
+          gloss: `week ${iso.week}, ${isoWeekdayNames[iso.weekday - 1]}`
+        },
+        {
+          value: `${y}-${ord}`,
+          label: "ISO 8601 ordinal date",
+          gloss: `day ${ord} of ${y}`
+        },
+        {
+          value: `${y}${fn.letter}${p2(fn.day)}`,
+          label: "Fortnight",
+          gloss: `day ${fn.day} of fortnight ${fn.letter} (${fn.ordinal} of 26)`
+        },
+        {
+          value: `${jdn}`,
+          label: "Julian Day Number",
+          gloss: "days since 24 Nov 4714 BC"
+        },
+        {
+          value: `@${p2(beat).padStart(3, "0")}`,
+          label: "Swatch Internet Time",
+          gloss: ".beats — 1000 per day, Biel Mean Time"
+        },
+        {
+          value: `${megaseconds.toFixed(6)} Ms`,
+          label: "Unix megaseconds",
+          gloss: "millions of seconds since 1 Jan 1970 UTC"
+        }
+      ];
+    }
+
+    // Create the list skeleton once; update text in place each tick.
+    let items = null;
+    function ensureRows(data) {
+      if (items) return;
+      items = data.map((row, i) => {
+        const li = document.createElement("li");
+
+        const sw = document.createElement("span");
+        sw.className = "swatch";
+        sw.style.background = palette[i % palette.length];
+
+        const body = document.createElement("div");
+        body.className = "body";
+        const value = document.createElement("div");
+        value.className = "value";
+        value.style.color = palette[i % palette.length];
+        const label = document.createElement("div");
+        label.className = "label";
+        const gloss = document.createElement("div");
+        gloss.className = "gloss";
+
+        body.append(value, label, gloss);
+        li.append(sw, body);
+        rowsEl.append(li);
+        return { value, label, gloss };
+      });
+    }
+
+    function render() {
+      const d = new Date();
+      const data = build(d);
+      ensureRows(data);
+
+      data.forEach((row, i) => {
+        if (items[i].value.textContent !== row.value) items[i].value.textContent = row.value;
+        if (items[i].label.textContent !== row.label) items[i].label.textContent = row.label;
+        if (items[i].gloss.textContent !== row.gloss) items[i].gloss.textContent = row.gloss;
+      });
+
+      weekdayEl.textContent = weekdayNames[d.getDay()];
+      fulldateEl.textContent = `${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+      document.title = `${data[0].value} · Today, Many Ways`;
+    }
+
+    function scheduleAlignedUpdates() {
+      const msUntilNextSecond = 1000 - new Date().getMilliseconds();
+      setTimeout(() => {
+        render();
+        setInterval(render, 1000);
+      }, msUntilNextSecond);
+    }
+
+    render();
+    scheduleAlignedUpdates();
+  </script>
+</body>
+</html>

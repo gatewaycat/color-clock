@@ -13,3 +13,9 @@
 ### Live preview
 
 https://htmlpreview.github.io/?https://github.com/gatewaycat/color-clock/blob/main/hhmm.html
+
+### Today's date, many ways
+
+A live page describing today's date in every notation worth caring about — ISO calendar / week / ordinal date, a custom fortnight calendar, the Julian Day Number, Swatch Internet Time (.beats), and Unix megaseconds.
+
+https://htmlpreview.github.io/?https://github.com/gatewaycat/color-clock/blob/main/date.html
