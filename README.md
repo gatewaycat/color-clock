@@ -8,9 +8,11 @@ One twelve color clock, three vertical bands.
 
 The minute bands use the same colors as the hour band, just never 10 (a) or 11 (b), so a color is always the same digit.
 
-### Examples 08:59 17:36 19:50
+### Examples 629 a51 804
 
-<img src="859.png" alt="08:59 = 859 = azure lime blue" width="180"> <img src="536.png" alt="17:36 = 536 = lime gold green" width="180"> <img src="750.png" alt="19:50 = 750 = cyan lime red" width="180">
+<img src="example-629.png" alt="629 = green orange blue = 06:29 or 18:29" width="180"> <img src="example-a51.png" alt="a51 = indigo lime tangerine = 10:51 or 22:51" width="180"> <img src="example-804.png" alt="804 = azure red yellow = 08:04 or 20:04" width="180">
+
+629 is 06:29 or 18:29, a51 is 10:51 or 22:51, and 804 is 08:04 or 20:04.
 
 ### The twelve colors 0 through b
 
