@@ -12,6 +12,6 @@ Only the hour band uses 10 and 11.
 
 # Examples
 
-<img src="example-629.png" alt="629 = green orange blue = 6:29" width="180"> &nbsp;&nbsp;&nbsp; <img src="example-a51.png" alt="a51 = indigo lime tangerine = 10:51" width="180"> &nbsp;&nbsp;&nbsp; <img src="example-804.png" alt="804 = azure red yellow = 8:04" width="180">
+<img src="example-629.png" alt="629 = green orange blue = 6:29" width="180"> &nbsp;&nbsp;&nbsp; <img src="example-804.png" alt="804 = azure red yellow = 8:04" width="180"> &nbsp;&nbsp;&nbsp; <img src="example-a51.png" alt="a51 = indigo lime tangerine = 10:51" width="180">
 
-6:29, 10:51, 8:04
+6:29, 8:04, 10:51
