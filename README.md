@@ -8,6 +8,8 @@ One twelve color clock, three vertical bands.
 
 The minute bands use the same colors as the hour band, just never 10 (a) or 11 (b), so a color is always the same digit.
 
+Each band is about 1 to root 3, so the clock is 12:7.
+
 ### Examples 629 a51 804
 
 <img src="example-629.png" alt="629 = green orange blue = 06:29 or 18:29" width="180"> <img src="example-a51.png" alt="a51 = indigo lime tangerine = 10:51 or 22:51" width="180"> <img src="example-804.png" alt="804 = azure red yellow = 08:04 or 20:04" width="180">
