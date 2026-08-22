@@ -10,7 +10,7 @@ The minute bands use the same colors as the hour band, just never 10 (a) or 11 (
 
 ### Examples 08:59 17:36 19:50
 
-<img src="0859.png" alt="08:59 = azure chartreuse blue" width="120"> <img src="1736.png" alt="17:36 = chartreuse gold green" width="120"> <img src="1950.png" alt="19:50 = teal chartreuse red" width="120">
+<img src="859.png" alt="08:59 = 859 = azure chartreuse blue" width="180"> <img src="536.png" alt="17:36 = 536 = chartreuse gold green" width="180"> <img src="750.png" alt="19:50 = 750 = teal chartreuse red" width="180">
 
 ### The twelve colors 0 through b
 
