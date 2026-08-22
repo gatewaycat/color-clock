@@ -1,6 +1,6 @@
 # Tricolor Clock
 
-Each 12-hour clock time is a tricolor flag H:MM
+Each 12-hour clock time is a tricolor flag — H:MM
 
 ### Digits
 
