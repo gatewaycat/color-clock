@@ -10,9 +10,9 @@
     body { background: var(--bg); display: grid; place-items: center; }
 
     .clock {
-      /* Three bands, each about 1 to root 3, so the whole clock is 12:7. */
-      width: min(92vw, calc(88vh * 12 / 7), 900px);
-      aspect-ratio: 12 / 7;
+      /* Three bands, each 1:2, so the whole clock is 3:2. */
+      width: min(92vw, calc(88vh * 3 / 2), 900px);
+      aspect-ratio: 3 / 2;
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 0;

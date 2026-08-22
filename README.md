@@ -1,4 +1,4 @@
-# color-clock
+# Twelve Color Clock
 
 ## ▶ [Live preview](https://htmlpreview.github.io/?https://github.com/gatewaycat/color-clock/blob/main/index.html)
 
@@ -12,6 +12,6 @@ Only the hour band uses 10 and 11.
 
 # Examples
 
-<img src="example-629.png" alt="629 = green orange blue = 06:29 or 18:29" width="180"> <img src="example-a51.png" alt="a51 = indigo lime tangerine = 10:51 or 22:51" width="180"> <img src="example-804.png" alt="804 = azure red yellow = 08:04 or 20:04" width="180">
+<img src="example-629.png" alt="629 = green orange blue = 6:29" width="180"> &nbsp;&nbsp;&nbsp; <img src="example-a51.png" alt="a51 = indigo lime tangerine = 10:51" width="180"> &nbsp;&nbsp;&nbsp; <img src="example-804.png" alt="804 = azure red yellow = 8:04" width="180">
 
-629 is 06:29 or 18:29 · a51 is 10:51 or 22:51 · 804 is 08:04 or 20:04
+6:29, 10:51, 8:04
