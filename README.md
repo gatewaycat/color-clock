@@ -10,11 +10,11 @@ The minute bands use the same colors as the hour band, just never 10 (a) or 11 (
 
 ### Examples 08:59 17:36 19:50
 
-<img src="859.png" alt="08:59 = 859 = azure chartreuse blue" width="180"> <img src="536.png" alt="17:36 = 536 = chartreuse gold green" width="180"> <img src="750.png" alt="19:50 = 750 = teal chartreuse red" width="180">
+<img src="859.png" alt="08:59 = 859 = azure lime blue" width="180"> <img src="536.png" alt="17:36 = 536 = lime gold green" width="180"> <img src="750.png" alt="19:50 = 750 = cyan lime red" width="180">
 
 ### The twelve colors 0 through b
 
-<img src="0.png" alt="Digit 0 = #E40303 = red" width="60"> <img src="1.png" alt="Digit 1 = #F55A00 = vermillion" width="60"> <img src="2.png" alt="Digit 2 = #FF8C00 = orange" width="60"> <img src="3.png" alt="Digit 3 = #FFBB00 = gold" width="60"> <img src="4.png" alt="Digit 4 = #FFED00 = yellow" width="60"> <img src="5.png" alt="Digit 5 = #8DB813 = chartreuse" width="60"> <img src="6.png" alt="Digit 6 = #008026 = green" width="60"> <img src="7.png" alt="Digit 7 = #00AAAA = teal" width="60"> <img src="8.png" alt="Digit 8 = #0088CC = azure" width="60"> <img src="9.png" alt="Digit 9 = #004DFF = blue" width="60"> <img src="a.png" alt="Digit a = #3A34D6 = indigo" width="60"> <img src="b.png" alt="Digit b = #6425CB = violet" width="60">
+<img src="0.png" alt="Digit 0 = #E40303 = red" width="60"> <img src="1.png" alt="Digit 1 = #F55A00 = tangerine" width="60"> <img src="2.png" alt="Digit 2 = #FF8C00 = orange" width="60"> <img src="3.png" alt="Digit 3 = #FFBB00 = gold" width="60"> <img src="4.png" alt="Digit 4 = #FFED00 = yellow" width="60"> <img src="5.png" alt="Digit 5 = #8DB813 = lime" width="60"> <img src="6.png" alt="Digit 6 = #008026 = green" width="60"> <img src="7.png" alt="Digit 7 = #00AAAA = cyan" width="60"> <img src="8.png" alt="Digit 8 = #0088CC = azure" width="60"> <img src="9.png" alt="Digit 9 = #004DFF = blue" width="60"> <img src="a.png" alt="Digit a = #3A34D6 = indigo" width="60"> <img src="b.png" alt="Digit b = #6425CB = violet" width="60">
 
 Only the hour band ever shows a or b.
 
