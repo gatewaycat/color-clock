@@ -1,0 +1,31 @@
+\documentclass[tikz]{standalone}
+
+\definecolor{0}{HTML}{FFFFFF}
+\definecolor{1}{HTML}{E40303}
+\definecolor{2}{HTML}{F45A00}
+\definecolor{3}{HTML}{FFAA00}
+\definecolor{4}{HTML}{FFED00}
+\definecolor{5}{HTML}{8DB813}
+\definecolor{6}{HTML}{008026}
+\definecolor{7}{HTML}{00AAAA}
+\definecolor{8}{HTML}{0088CC}
+\definecolor{9}{HTML}{004DFF}
+\definecolor{10}{HTML}{3A34D6}
+\definecolor{11}{HTML}{6425CB}
+
+\newcommand\tricolor[3]{
+\begin{tikzpicture}
+\fill[#1] (0,0) rectangle node[black] {#1} ++(1,2);
+\fill[#2] (1,0) rectangle node[black] {#2} ++(1,2);
+\fill[#3] (2,0) rectangle node[black] {#3} ++(1,2);
+\end{tikzpicture}
+}
+
+\begin{document}
+\foreach \n in {0,...,719} {
+    \pgfmathtruncatemacro{\a}{int(\n/60)}
+    \pgfmathtruncatemacro{\b}{int(mod(\n, 60)/10)}
+    \pgfmathtruncatemacro{\c}{mod(\n, 10)}
+    \tricolor{\a}{\b}{\c}
+    }
+\end{document}

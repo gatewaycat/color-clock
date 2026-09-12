@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# Regenerate the digit swatches (swatch-0.png..swatch-9.png, swatch-a.png,
+# swatch-b.png) and the example tricolor images (example-*.png) from the
+# color palette defined in all-times.tex, so the palette has one source
+# of truth.
+#
+# Requires ImageMagick (`magick`).
+
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")"
+
+TEX_FILE="all-times.tex"
+FONT="/System/Library/Fonts/Supplemental/Verdana Bold.ttf"
+POINTSIZE=97
+SWATCH_SIZE=240x240
+BAND_SIZE=400x800
+
+# digit index -> filename stem (10/11 use the hex-clock convention a/b)
+stem_for() {
+  case "$1" in
+    10) echo "a" ;;
+    11) echo "b" ;;
+    *)  echo "$1" ;;
+  esac
+}
+
+# example filename char -> digit index (inverse of stem_for)
+digit_for() {
+  case "$1" in
+    a) echo "10" ;;
+    b) echo "11" ;;
+    *) echo "$1" ;;
+  esac
+}
+
+declare -A HEX_OF
+
+echo "== swatches =="
+while IFS= read -r line; do
+  n=$(sed -E 's/\\definecolor\{([0-9]+)\}.*/\1/' <<<"$line")
+  hex=$(sed -E 's/.*\{HTML\}\{([0-9A-Fa-f]{6})\}.*/\1/' <<<"$line")
+  HEX_OF[$n]="$hex"
+  stem=$(stem_for "$n")
+  out="swatch-${stem}.png"
+  # the label drawn on the swatch is the decimal digit index itself
+  # (so 10/11 render as "10"/"11", even though the files are a.png/b.png)
+  label="$n"
+
+  # every swatch uses white text, except light backgrounds (e.g. the
+  # white "0" swatch) where white text would be invisible
+  r=$((16#${hex:0:2})); g=$((16#${hex:2:2})); b=$((16#${hex:4:2}))
+  luminance=$(( (299*r + 587*g + 114*b) / 1000 ))
+  if [ "$luminance" -gt 130 ]; then
+    textcolor="black"
+  else
+    textcolor="white"
+  fi
+
+  magick -size "$SWATCH_SIZE" "xc:#${hex}" \
+    -font "$FONT" -pointsize "$POINTSIZE" \
+    -fill "$textcolor" -gravity center -annotate +0-2 "$label" \
+    "$out"
+
+  echo "wrote $out  (#$hex, $textcolor text)"
+done < <(grep '\\definecolor' "$TEX_FILE")
+
+echo "== examples =="
+for out in example-037.png example-629.png example-a51.png; do
+  digits=$(sed -E 's/example-([0-9a-b]{3})\.png/\1/' <<<"$out")
+  bands=()
+  for (( i=0; i<3; i++ )); do
+    ch="${digits:$i:1}"
+    n=$(digit_for "$ch")
+    hex="${HEX_OF[$n]}"
+    band="/tmp/$$-band-$i.png"
+    magick -size "$BAND_SIZE" "xc:#${hex}" "$band"
+    bands+=("$band")
+  done
+  magick "${bands[@]}" +append "$out"
+  rm -f "${bands[@]}"
+  echo "wrote $out  (digits $digits)"
+done
