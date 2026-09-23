@@ -4,9 +4,9 @@
 
 ## Example
 
-| 3:59 |
+| 3:05 |
 | --- |
-| <img src="example-359.png" alt="3:59 = orange lime blue" width="100" align="center"> |
+| <img src="example-305.png" alt="3:59 = orange lime blue" width="100" align="center"> |
 
 ## The two digits for the minute
 
