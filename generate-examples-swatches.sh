@@ -13,8 +13,10 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 TEX_FILE="all-times.tex"
 FONT="/System/Library/Fonts/Supplemental/Verdana Bold.ttf"
-POINTSIZE=97
-SWATCH_SIZE=240x240
+POINTSIZE=243
+# Examples are 1200x800 landscape flags (3:2), built from three vertical stripes.
+# Swatches use the same 800px height and a 1:2 width-to-height ratio.
+SWATCH_SIZE=400x800
 BAND_SIZE=400x800
 
 # digit index -> filename stem (10/11 use the hex-clock convention a/b)
@@ -74,7 +76,7 @@ magick -size "$SWATCH_SIZE" xc:white \
 echo "wrote swatch-0h.png  (#FFFFFF, black text)"
 
 echo "== examples =="
-for out in example-147.png example-305.png example-359.png example-037.png example-629.png example-a51.png; do
+for out in example-147.png example-503.png example-359.png example-037.png example-629.png example-a51.png; do
   digits=$(sed -E 's/example-([0-9a-b]{3})\.png/\1/' <<<"$out")
   bands=()
   for (( i=0; i<3; i++ )); do
