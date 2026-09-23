@@ -60,10 +60,14 @@ while IFS= read -r line; do
     textcolor="white"
   fi
 
+  border=()
+  if [[ "$n" == "0" ]]; then
+    border=(-stroke black -strokewidth 2 -fill none -draw "rectangle 1,1 398,798")
+  fi
   magick -size "$SWATCH_SIZE" "xc:#${hex}" \
     -font "$FONT" -pointsize "$POINTSIZE" \
     -fill "$textcolor" -gravity center -annotate +0-2 "$label" \
-    "$out"
+    "${border[@]}" "$out"
 
   echo "wrote $out  (#$hex, $textcolor text)"
 done < <(grep '\\definecolor' "$TEX_FILE")
@@ -72,11 +76,12 @@ done < <(grep '\\definecolor' "$TEX_FILE")
 magick -size "$SWATCH_SIZE" xc:white \
   -font "$FONT" -pointsize "$POINTSIZE" \
   -fill black -gravity center -annotate +0-2 "12" \
+  -stroke black -strokewidth 2 -fill none -draw "rectangle 1,1 398,798" \
   "swatch-0h.png"
 echo "wrote swatch-0h.png  (#FFFFFF, black text)"
 
 echo "== examples =="
-for out in example-147.png example-503.png example-359.png example-037.png example-629.png example-a51.png; do
+for out in example-147.png example-503.png example-305.png example-359.png example-037.png example-629.png example-a51.png; do
   digits=$(sed -E 's/example-([0-9a-b]{3})\.png/\1/' <<<"$out")
   bands=()
   for (( i=0; i<3; i++ )); do
@@ -84,7 +89,12 @@ for out in example-147.png example-503.png example-359.png example-037.png examp
     n=$(digit_for "$ch")
     hex="${HEX_OF[$n]}"
     band="/tmp/$$-band-$i.png"
-    magick -size "$BAND_SIZE" "xc:#${hex}" "$band"
+    if [[ "$n" == "0" ]]; then
+      magick -size "$BAND_SIZE" "xc:#${hex}" \
+        -stroke black -strokewidth 2 -fill none -draw "rectangle 1,1 398,798" "$band"
+    else
+      magick -size "$BAND_SIZE" "xc:#${hex}" "$band"
+    fi
     bands+=("$band")
   done
   magick "${bands[@]}" +append "$out"
