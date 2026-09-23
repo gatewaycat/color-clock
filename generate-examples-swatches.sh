@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Regenerate the digit swatches (swatch-0.png..swatch-9.png, swatch-a.png,
-# swatch-b.png) and the example tricolor images (example-*.png) from the
+# swatch-b.png, plus the white hour swatch swatch-0h.png labeled 12)
+# and the example tricolor images (example-*.png) from the
 # color palette defined in all-times.tex, so the palette has one source
 # of truth.
 #
@@ -65,8 +66,15 @@ while IFS= read -r line; do
   echo "wrote $out  (#$hex, $textcolor text)"
 done < <(grep '\\definecolor' "$TEX_FILE")
 
+# Hour-display variant of zero, labeled 12.
+magick -size "$SWATCH_SIZE" xc:white \
+  -font "$FONT" -pointsize "$POINTSIZE" \
+  -fill black -gravity center -annotate +0-2 "12" \
+  "swatch-0h.png"
+echo "wrote swatch-0h.png  (#FFFFFF, black text)"
+
 echo "== examples =="
-for out in example-037.png example-629.png example-a51.png; do
+for out in example-147.png example-359.png example-037.png example-629.png example-a51.png; do
   digits=$(sed -E 's/example-([0-9a-b]{3})\.png/\1/' <<<"$out")
   bands=()
   for (( i=0; i<3; i++ )); do
