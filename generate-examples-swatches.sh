@@ -74,7 +74,7 @@ magick -size "$SWATCH_SIZE" xc:white \
 echo "wrote swatch-0h.png  (#FFFFFF, black text)"
 
 echo "== examples =="
-for out in example-147.png example-359.png example-037.png example-629.png example-a51.png; do
+for out in example-147.png example-305.png example-359.png example-037.png example-629.png example-a51.png; do
   digits=$(sed -E 's/example-([0-9a-b]{3})\.png/\1/' <<<"$out")
   bands=()
   for (( i=0; i<3; i++ )); do
