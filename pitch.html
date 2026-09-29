@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#000000" />
+  <title>Color Pitch</title>
+  <style>
+    :root { --bg: #000; --fg: #fff; }
+    html, body { height: 100%; margin: 0; }
+    [hidden] { display: none !important; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      transition: background-color 120ms linear;
+      font-family: Verdana, system-ui, sans-serif;
+      font-weight: bold;
+      overflow: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+      cursor: pointer;
+    }
+
+    /* Everything is optional decoration; the color is the display. */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 16px;
+    }
+    .start { font-size: clamp(20px, 5vw, 36px); opacity: 0.85; }
+    .start small { display: block; font-size: 0.5em; opacity: 0.7; margin-top: 0.8em; font-weight: normal; }
+
+    .readout {
+      position: fixed;
+      left: 0; right: 0;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      text-align: center;
+      opacity: 0.55;
+      font-size: clamp(18px, 4vw, 28px);
+      line-height: 1.3;
+    }
+    .readout .cents { font-size: 0.6em; font-weight: normal; }
+    body.hide-labels .readout { display: none; }
+  </style>
+</head>
+<body>
+  <div class="overlay" id="start">
+    <div class="start">
+      Tap to listen
+      <small>Sing or play a note and the screen turns its color.<br>Tap again to hide or show the note name.</small>
+    </div>
+  </div>
+  <div class="readout" id="readout" hidden>
+    <div id="note">&nbsp;</div>
+    <div class="cents" id="cents">&nbsp;</div>
+  </div>
+
+  <script>
+    // The same twelve colors as the clock, one per pitch class starting at C.
+    // C is 0 (white), just as 12 o'clock is 0.
+    const palette = [
+      "#FFFFFF", // 0  C   white
+      "#E40303", // 1  C#  red
+      "#F45A00", // 2  D   tangerine
+      "#FFAA00", // 3  D#  orange
+      "#FFED00", // 4  E   yellow
+      "#8DB813", // 5  F   lime
+      "#008026", // 6  F#  green
+      "#00AAAA", // 7  G   cyan
+      "#0088CC", // 8  G#  azure
+      "#004DFF", // 9  A   blue
+      "#3A34D6", // 10 A#  indigo
+      "#6425CB"  // 11 B   violet
+    ];
+    // Colors light enough that the label reads better in black.
+    const lightColors = new Set([0, 3, 4, 5]);
+
+    const noteNames = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
+    const A4 = 440;
+
+    // Pitch range worth reporting: roughly a bass voice's low E up to C7.
+    const MIN_HZ = 70;
+    const MAX_HZ = 2100;
+    // Quieter than this (RMS of the raw signal) counts as silence.
+    const SILENCE_RMS = 0.01;
+    // YIN threshold: lower is stricter about what counts as a clear pitch.
+    const YIN_THRESHOLD = 0.15;
+    // Keep showing the last note this long after the sound stops.
+    const HOLD_MS = 400;
+
+    // YIN pitch detection (de Cheveigné & Kawahara, 2002).
+    // Returns the fundamental frequency in Hz, or null when there's no clear pitch.
+    function detectPitch(buf, sampleRate) {
+      let rms = 0;
+      for (let i = 0; i < buf.length; i++) rms += buf[i] * buf[i];
+      rms = Math.sqrt(rms / buf.length);
+      if (rms < SILENCE_RMS) return null;
+
+      const maxTau = Math.min(Math.floor(sampleRate / MIN_HZ), Math.floor(buf.length / 2));
+      const minTau = Math.max(2, Math.floor(sampleRate / MAX_HZ));
+      const n = buf.length - maxTau;
+
+      // Difference function, then cumulative mean normalized difference.
+      const d = new Float32Array(maxTau + 1);
+      for (let tau = 1; tau <= maxTau; tau++) {
+        let sum = 0;
+        for (let i = 0; i < n; i++) {
+          const delta = buf[i] - buf[i + tau];
+          sum += delta * delta;
+        }
+        d[tau] = sum;
+      }
+      d[0] = 1;
+      let running = 0;
+      for (let tau = 1; tau <= maxTau; tau++) {
+        running += d[tau];
+        d[tau] = running === 0 ? 1 : d[tau] * tau / running;
+      }
+
+      // First dip below the threshold, followed down to its local minimum.
+      let tau = -1;
+      for (let t = minTau; t < maxTau; t++) {
+        if (d[t] < YIN_THRESHOLD) {
+          while (t + 1 < maxTau && d[t + 1] < d[t]) t++;
+          tau = t;
+          break;
+        }
+      }
+      if (tau === -1) return null;
+
+      // Parabolic interpolation around the minimum for sub-sample accuracy.
+      const a = d[tau - 1], b = d[tau], c = d[tau + 1];
+      const denom = a - 2 * b + c;
+      const shift = denom === 0 ? 0 : 0.5 * (a - c) / denom;
+      return sampleRate / (tau + shift);
+    }
+
+    // Nearest equal-tempered note: pitch class 0..11 (C..B), octave, and
+    // how many cents sharp (+) or flat (-) the sound is from that note.
+    function nearestNote(hz) {
+      const midiFloat = 69 + 12 * Math.log2(hz / A4);
+      const midi = Math.round(midiFloat);
+      return {
+        pitchClass: ((midi % 12) + 12) % 12,
+        octave: Math.floor(midi / 12) - 1,
+        cents: Math.round((midiFloat - midi) * 100)
+      };
+    }
+
+    const body = document.body;
+    const startEl = document.getElementById("start");
+    const readout = document.getElementById("readout");
+    const noteEl = document.getElementById("note");
+    const centsEl = document.getElementById("cents");
+
+    let shown = null;        // pitch class currently on screen, or null
+    let candidate = null;    // pitch class seen last frame, waiting to be confirmed
+    let lastHeard = 0;
+
+    function show(pc, note) {
+      if (pc === null) {
+        body.style.setProperty("--bg", "#000");
+        body.style.setProperty("--fg", "#fff");
+        noteEl.innerHTML = "&nbsp;";
+        centsEl.innerHTML = "&nbsp;";
+        document.title = "Color Pitch";
+      } else {
+        body.style.setProperty("--bg", palette[pc]);
+        body.style.setProperty("--fg", lightColors.has(pc) ? "#000" : "#fff");
+        noteEl.textContent = noteNames[pc] + note.octave;
+        const c = note.cents;
+        centsEl.textContent = c === 0 ? "in tune" : (c > 0 ? "+" : "−") + Math.abs(c) + "¢";
+        document.title = `Color Pitch (${noteNames[pc]})`;
+      }
+      shown = pc;
+    }
+
+    async function start() {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+      });
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      await ctx.resume();
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 4096; // ~85 ms at 48 kHz: enough periods for low notes
+      source.connect(analyser);
+      const buf = new Float32Array(analyser.fftSize);
+
+      function tick(now) {
+        analyser.getFloatTimeDomainData(buf);
+        const hz = detectPitch(buf, ctx.sampleRate);
+
+        if (hz !== null) {
+          const note = nearestNote(hz);
+          // Require the same note two frames running so one stray
+          // frame (a consonant, a harmonic jump) doesn't flash a color.
+          if (note.pitchClass === candidate || note.pitchClass === shown) {
+            show(note.pitchClass, note);
+            lastHeard = now;
+          }
+          candidate = note.pitchClass;
+        } else {
+          candidate = null;
+          if (shown !== null && now - lastHeard > HOLD_MS) show(null);
+        }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    let listening = false;
+    body.addEventListener("click", async () => {
+      if (listening) {
+        body.classList.toggle("hide-labels");
+        return;
+      }
+      listening = true;
+      startEl.querySelector(".start").firstChild.textContent = "Starting…";
+      try {
+        await start();
+        startEl.hidden = true;
+        readout.hidden = false;
+      } catch (err) {
+        listening = false;
+        startEl.querySelector(".start").firstChild.textContent =
+          "Microphone unavailable. Tap to try again.";
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
